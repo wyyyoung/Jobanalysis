@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实习岗位数据分析平台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F5F0EB;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #FAF7F2;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            border: 1px solid #E8E0D8;
+        }
+
+        .header h1 {
+            color: #5C5347;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            color: #8B7E70;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card {
+            background: #FAF7F2;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E8E0D8;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card i {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            color: #A89F91;
+        }
+
+        .stat-card h3 {
+            font-size: 1.6rem;
+            color: #5C5347;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-card p {
+            color: #8B7E70;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .chart-card {
+            background: #FAF7F2;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E8E0D8;
+        }
+
+        .chart-card h3 {
+            color: #5C5347;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #D4CCC4;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+
+        .footer {
+            background: #FAF7F2;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            color: #8B7E70;
+            font-size: 0.8rem;
+            border: 1px solid #E8E0D8;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-graph-up-arrow"></i> 实习岗位数据分析平台</h1>
+            <p>基于大数据的实习市场洞察与趋势分析</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="bi bi-briefcase"></i>
+                <h3 id="total-jobs">-</h3>
+                <p>实习岗位总数</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-building"></i>
+                <h3 id="total-companies">-</h3>
+                <p>合作企业数量</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-geo-alt"></i>
+                <h3 id="total-cities">-</h3>
+                <p>覆盖城市数量</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-tags"></i>
+                <h3 id="total-tags">-</h3>
+                <p>技能标签数量</p>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="bi bi-geo-alt-fill"></i> 热门城市排名</h3>
+                <div class="chart-container">
+                    <canvas id="cityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="bi bi-building-fill"></i> 招聘热门公司</h3>
+                <div class="chart-container">
+                    <canvas id="companyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="bi bi-tools"></i> 热门技能需求</h3>
+                <div class="chart-container">
+                    <canvas id="skillChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="bi bi-pie-chart"></i> 数据来源平台</h3>
+                <div class="chart-container">
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="bi bi-diagram-3"></i> 技能分类统计</h3>
+                <div class="chart-container">
+                    <canvas id="skillCategoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="bi bi-bar-chart"></i> 行业分布分析</h3>
+                <div class="chart-container">
+                    <canvas id="industryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><i class="bi bi-info-circle"></i> 数据实时更新 | 基于真实招聘数据分析</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        const colors = {
+            primary: '#A89F91',
+            secondary: '#8B7E70',
+            accent1: '#C4B8A8',
+            accent2: '#D4CCC4',
+            accent3: '#E8E0D8',
+            accent4: '#5C5347',
+            morandi: ['#A89F91', '#8B7E70', '#C4B8A8', '#D4CCC4', '#E8E0D8', '#5C5347', '#9D9488', '#7A6E62']
+        };
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        async function loadOverview() {
+            const data = await fetchData('/api/overview');
+            if (data) {
+                document.getElementById('total-jobs').textContent = data.total_jobs.toLocaleString();
+                document.getElementById('total-companies').textContent = data.total_companies.toLocaleString();
+                document.getElementById('total-cities').textContent = data.total_cities.toLocaleString();
+                document.getElementById('total-tags').textContent = data.total_tags.toLocaleString();
+            }
+        }
+
+        async function createCityChart() {
+            const data = await fetchData('/api/city-ranking');
+            if (data) {
+                const ctx = document.getElementById('cityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.cities,
+                        datasets: [{
+                            label: '职位数量',
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: colors.primary,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    },
+                                    font: {
+                                        size: 10,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    color: '#E8E0D8',
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 10,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70',
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function createCompanyChart() {
+            const data = await fetchData('/api/company-ranking');
+            if (data) {
+                const ctx = document.getElementById('companyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.companies,
+                        datasets: [{
+                            label: '职位数量',
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: colors.primary,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    },
+                                    font: {
+                                        size: 10,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    color: '#E8E0D8',
+                                    drawBorder: false
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    font: {
+                                        size: 9,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function createSkillChart() {
+            const data = await fetchData('/api/skill-ranking');
+            if (data) {
+                const ctx = document.getElementById('skillChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.skills,
+                        datasets: [{
+                            label: '职位数量',
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: colors.primary,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    },
+                                    font: {
+                                        size: 10,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    color: '#E8E0D8',
+                                    drawBorder: false
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    font: {
+                                        size: 9,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function createPlatformChart() {
+            const data = await fetchData('/api/platform-distribution');
+            if (data) {
+                const ctx = document.getElementById('platformChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.platforms,
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: '#FAF7F2',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 9,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70',
+                                    boxWidth: 12,
+                                    padding: 8
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function createSkillCategoryChart() {
+            const data = await fetchData('/api/skill-category');
+            if (data) {
+                const ctx = document.getElementById('skillCategoryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categories,
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: '#FAF7F2',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 9,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70',
+                                    boxWidth: 12,
+                                    padding: 8
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function createIndustryChart() {
+            const data = await fetchData('/api/industry-analysis');
+            if (data) {
+                const ctx = document.getElementById('industryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.industries,
+                        datasets: [{
+                            label: '职位数量',
+                            data: data.counts,
+                            backgroundColor: colors.morandi,
+                            borderColor: colors.primary,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    },
+                                    font: {
+                                        size: 10,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70'
+                                },
+                                grid: {
+                                    color: '#E8E0D8',
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 9,
+                                        family: "'Segoe UI', sans-serif"
+                                    },
+                                    color: '#8B7E70',
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOverview();
+            createCityChart();
+            createCompanyChart();
+            createSkillChart();
+            createPlatformChart();
+            createSkillCategoryChart();
+            createIndustryChart();
+        });
+    </script>
+</body>
+</html>
